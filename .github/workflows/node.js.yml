@@ -145,7 +145,7 @@ jobs:
           tags: 352326956023.dkr.ecr.ap-south-1.amazonaws.com/backend-repo:latest
           file: Application-Code/backend/Dockerfile
 
-  ecs-deploy:
+  eks-deploy:
     runs-on: ubuntu-latest
     needs: docker-backend-build-and-push
     steps:
@@ -156,19 +156,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      - name: Verify AWS Identity
-        run: aws sts get-caller-identity
-
-      - name: Deploy Frontend Service to ECS
+      - name: Setup kubectl
         run: |
-          aws ecs update-service \
-            --cluster three-tier-ecs-cluster-1 \
-            --service frontend-service \
-            --force-new-deployment
+          aws eks update-kubeconfig --region ap-south-1 --name three-tier-cluster
+          kubectl get nodes
 
-      - name: Deploy Backend Service to ECS
+      - name: Deploy Frontend
         run: |
-          aws ecs update-service \
-            --cluster three-tier-ecs-cluster-1 \
-            --service backend-service \
-            --force-new-deployment
+          kubectl set image deployment/frontend frontend=352326956023.dkr.ecr.ap-south-1.amazonaws.com/frontend-repo:latest
+          kubectl rollout status deployment/frontend
+
+      - name: Deploy Backend
+        run: |
+          kubectl set image deployment/backend backend=352326956023.dkr.ecr.ap-south-1.amazonaws.com/backend-repo:latest
+          kubectl rollout status deployment/backend
