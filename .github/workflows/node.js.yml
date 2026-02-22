@@ -8,24 +8,18 @@ on:
 
 jobs:
   compile:
-    runs-on: self-hosted 
+    runs-on: self-hosted
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '23'   # change based on your environment
-
-      # ---------- Frontend Syntax Check ----------
-      - name: Frontend Compilation (Syntax Check)
+      - name: Frontend Syntax Check
         run: |
-          cd client
+          cd Application-Code/frontend
           find . -name "*.js" -exec node --check {} \;
 
-      # ---------- Backend Syntax Check ----------
-      - name: Backend Compilation (Syntax Check)
+      - name: Backend Syntax Check
         run: |
-          cd api
+          cd Application-Code/backend
           find . -name "*.js" -exec node --check {} \;
