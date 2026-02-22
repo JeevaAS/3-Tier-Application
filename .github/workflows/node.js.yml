@@ -55,9 +55,29 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-  sonar-backend:
+  sonar-frontend:
     runs-on: self-hosted
     needs: trivy_fs_scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: SonarQube Scan (frontend)
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          projectBaseDir: Application-Code/frontend
+          args: >
+            -Dsonar.projectKey=myorg_frontend
+            -Dsonar.projectName=myorg_frontend
+            -Dsonar.sources=.
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  sonar-backend:
+    runs-on: self-hosted
+    needs: sonar-frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
