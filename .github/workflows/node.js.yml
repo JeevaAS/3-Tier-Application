@@ -8,7 +8,7 @@ on:
 
 jobs:
   compile:
-    runs-on: Agent-1  
+    runs-on: Runner-1  
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
