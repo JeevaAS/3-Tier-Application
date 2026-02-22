@@ -62,13 +62,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: SonarQube Scan (api)
+      - name: SonarQube Scan (backend)
         uses: sonarsource/sonarqube-scan-action@master
         with:
-          projectBaseDir: api
+          projectBaseDir: Application-Code/backend
           args: >
-            -Dsonar.projectKey=myorg_api
-            -Dsonar.projectName=myorg_api
+            -Dsonar.projectKey=myorg_backend
+            -Dsonar.projectName=myorg_backend
             -Dsonar.sources=.
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
         env:
