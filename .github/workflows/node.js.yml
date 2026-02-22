@@ -98,24 +98,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ap-south-1 \
+          | docker login --username AWS --password-stdin 352326956023.dkr.ecr.ap-south-1.amazonaws.com
 
       - name: Build and Push Frontend Docker Image
         uses: docker/build-push-action@v6
         with:
           context: Application-Code/frontend
           push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/frontend:latest
+          tags: 352326956023.dkr.ecr.ap-south-1.amazonaws.com/frontend-repo:latest
           file: Application-Code/frontend/Dockerfile
 
   docker-backend-build-and-push:
@@ -125,22 +125,47 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ap-south-1 \
+          | docker login --username AWS --password-stdin 352326956023.dkr.ecr.ap-south-1.amazonaws.com
 
       - name: Build and Push Backend Docker Image
         uses: docker/build-push-action@v6
         with:
           context: Application-Code/backend
           push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/backend:latest
+          tags: 352326956023.dkr.ecr.ap-south-1.amazonaws.com/backend-repo:latest
           file: Application-Code/backend/Dockerfile
+
+  ecs-deploy:
+    runs-on: ubuntu-latest
+    needs: docker-backend-build-and-push
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Deploy Frontend Service to ECS
+        run: |
+          aws ecs update-service \
+            --cluster three-tier-cluster \
+            --service frontend-service \
+            --force-new-deployment
+
+      - name: Deploy Backend Service to ECS
+        run: |
+          aws ecs update-service \
+            --cluster three-tier-cluster \
+            --service backend-service \
+            --force-new-deployment
