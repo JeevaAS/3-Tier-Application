@@ -156,6 +156,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
+      - name: Verify AWS Identity
+        run: aws sts get-caller-identity
+
       - name: Deploy Frontend Service to ECS
         run: |
           aws ecs update-service \
