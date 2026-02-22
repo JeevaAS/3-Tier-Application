@@ -162,13 +162,13 @@ jobs:
       - name: Deploy Frontend Service to ECS
         run: |
           aws ecs update-service \
-            --cluster three-tier-cluster \
+            --cluster three-tier-ecs-cluster-1 \
             --service frontend-service \
             --force-new-deployment
 
       - name: Deploy Backend Service to ECS
         run: |
           aws ecs update-service \
-            --cluster three-tier-cluster \
+            --cluster three-tier-ecs-cluster-1 \
             --service backend-service \
             --force-new-deployment
