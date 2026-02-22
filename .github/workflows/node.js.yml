@@ -41,7 +41,7 @@ jobs:
           gitleaks detect --source ./Application-Code/backend --exit-code 1
 
   trivy_fs_scan:
-    runs-on: Agent-1
+    runs-on: self-hosted
     needs: gitleaks-scan
     steps:
       - name: Checkout code
